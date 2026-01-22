@@ -1,0 +1,12 @@
+
+Windows サービスの作り方
+
+https://learn.microsoft.com/ja-jp/windows/win32/services/the-complete-service-sample
+
+https://qiita.com/tera1707/items/8f4246a5666a01134b59
+https://learn.microsoft.com/en-us/windows/win32/services/services
+https://learn.microsoft.com/en-us/windows/win32/services/svc-cpp
+
+https://qiita.com/tera1707/items/dc24ac78ae76906abb83
+
+
