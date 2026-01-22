@@ -9,4 +9,6 @@ https://learn.microsoft.com/en-us/windows/win32/services/svc-cpp
 
 https://qiita.com/tera1707/items/dc24ac78ae76906abb83
 
+https://www.keicode.com/windows/how-to-create-nt-service.php
+
 
