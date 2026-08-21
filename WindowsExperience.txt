@@ -1,0 +1,8 @@
+
+https://pc-net.club/appli/win11pc_performance.html
+
+```
+winsat formal -restart clean
+Get-CimInstance Win32_WinSat
+```
+
