@@ -1,0 +1,5 @@
+
+プロセス間通信 (NET)
+
+https://smdn.jp/programming/netfx/standard_streams/1_process/
+
