@@ -1,0 +1,510 @@
+
+
+WPFのFrameworkElementを使い単純に文字を表示するデモプログラム
+https://maywork.net/computer/wpf-frameworkelement-draw-text/
+
+
+C#でバイナリエディタみたいなのを作成したい
+https://teratail.com/questions/134903
+
+Be.HexEditor (editor for binary files, C#で書かれたバイナリエディタ, カスタムコントロール, WinForms, HexBox)
+https://devlights.hatenablog.com/entry/20120727/p1
+https://github.com/bernharde/hexbox
+
+WPFでウィンドウのサイズと位置を保存・復元する
+https://maywork.net/computer/wpf-windowplacementdemo/
+
+
+1. XAML（ビューの配置）
+xml<Window x:Class="WpfHexEditor.MainWindow"
+        xmlns="http://microsoft.com"
+        xmlns:x="http://microsoft.com"
+        xmlns:local="clr-namespace:WpfHexEditor"
+        Title="WPF Hex Editor" Height="450" Width="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- カスタム描画のヘキサエディタ -->
+        <local:HexRenderElement x:Name="HexEditor" Grid.Column0Background="White"/>
+
+        <!-- スクロールバー -->
+        <ScrollBar x:Name="VerticalScroll" Grid.Column="1" 
+                   Orientation="Vertical" 
+                   Scroll="VerticalScroll_Scroll"/>
+    </Grid>
+</Window>
+
+2. C#（コードビハインド）
+csharpusing System;
+using System.Windows;
+using System.Windows.Controls.Primitives;
+
+namespace WpfHexEditor
+{
+    public partial class MainWindow : Window
+    {
+        private byte[] _dummyData;
+        private const int BytesPerRow = 16;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            
+            // テスト用データ：1MBのバイナリを生成
+            _dummyData = new byte[1024 * 1024];
+            new Random().NextBytes(_dummyData);
+
+            HexEditor.SetData(_dummyData);
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateScrollRange();
+        }
+
+        private void UpdateScrollRange()
+        {
+            int totalRows = (int)Math.Ceiling((double)_dummyData.Length / BytesPerRow);
+            int visibleRows = (int)(HexEditor.ActualHeight / HexEditor.RowHeight);
+            
+            VerticalScroll.Minimum = 0;
+            VerticalScroll.Maximum = Math.Max(0, totalRows - visibleRows);
+            VerticalScroll.ViewportSize = visibleRows;
+        }
+
+        private void VerticalScroll_Scroll(object sender, ScrollEventArgs e)
+        {
+            // スクロール位置の行インデックスを渡して再描画
+            HexEditor.CurrentRowOffset = (int)e.NewValue;
+        }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            if (_dummyData != null) UpdateScrollRange();
+        }
+    }
+}
+
+3. C#（カスタムコントロールの実装）
+csharpusing System;
+using System.Globalization;
+using System.Text;
+using System.Windows;
+using System.Windows.Media;
+
+namespace WpfHexEditor
+{
+    public class HexRenderElement : FrameworkElement
+    {
+        private byte[] _data = Array.Empty<byte>();
+        private readonly VisualCollection _children;
+        private readonly DrawingVisual _drawingVisual;
+
+        // 描画チューニング用の定数
+        public double RowHeight { get; } = 18;
+        private const int BytesPerRow = 16;
+        private readonly Typeface _typeface = new Typeface("Consolas");
+        private readonly double _fontSize = 13;
+
+        // スクロール位置（行単位）
+        private int _currentRowOffset = 0;
+        public int CurrentRowOffset
+        {
+            get => _currentRowOffset;
+            set
+            {
+                if (_currentRowOffset != value)
+                {
+                    _currentRowOffset = value;
+                    Render(); // 位置が変わったら再描画
+                }
+            }
+        }
+
+        public HexRenderElement()
+        {
+            _children = new VisualCollection(this);
+            _drawingVisual = new DrawingVisual();
+            _children.Add(_drawingVisual);
+        }
+
+        public void SetData(byte[] data)
+        {
+            _data = data;
+            Render();
+        }
+
+        private void Render()
+        {
+            if (_data == null || _data.Length == 0) return;
+
+            using (DrawingContext dc = _drawingVisual.RenderOpen())
+            {
+                // 背景の塗りつぶし
+                dc.DrawRectangle(Brushes.White, null, new Rect(0, 0, ActualWidth, ActualHeight));
+
+                int visibleRows = (int)Math.Ceiling(ActualHeight / RowHeight);
+                int totalRows = (int)Math.Ceiling((double)_data.Length / BytesPerRow);
+
+                // X軸の初期描画位置（座標調整）
+                double addressX = 10;
+                double hexX = 100;
+                double asciiX = 420;
+
+                for (int i = 0; i < visibleRows; i++)
+                {
+                    int rowIndex = _currentRowOffset + i;
+                    if (rowIndex >= totalRows) break;
+
+                    double y = i * RowHeight;
+
+                    // 1. アドレス部の描画 (例: 000000A0)
+                    int fileOffset = rowIndex * BytesPerRow;
+                    DrawText(dc, fileOffset.ToString("X8"), addressX, y, Brushes.Gray);
+
+                    // 2. 16進数部 ＆ ASCII文字部のデータ作成
+                    StringBuilder hexBuilder = new StringBuilder();
+                    StringBuilder asciiBuilder = new StringBuilder();
+
+                    for (int j = 0; j < BytesPerRow; j++)
+                    {
+                        int byteIndex = fileOffset + j;
+                        if (byteIndex < _data.Length)
+                        {
+                            byte b = _data[byteIndex];
+                            hexBuilder.Append(b.ToString("X2") + " ");
+
+                            // 表示可能なASCII文字か判定
+                            asciiBuilder.Append(b >= 32 && b <= 126 ? (char)b : '.');
+                        }
+                        else
+                        {
+                            hexBuilder.Append("   "); // データが足りない末尾行の空白埋め
+                        }
+                    }
+
+                    // 3. 画面へ描画
+                    DrawText(dc, hexBuilder.ToString(), hexX, y, Brushes.Black);
+                    DrawText(dc, asciiBuilder.ToString(), asciiX, y, Brushes.Blue);
+                }
+            }
+        }
+
+        // テキスト描画用のヘルパーメソッド (WPFの最新の推奨方式)
+        private void DrawText(DrawingContext dc, string text, double x, double y, Brush brush)
+        {
+            var pixelsPerDip = VisualTreeHelper.GetPixelsPerDip(this);
+            var formattedText = new FormattedText(
+                text,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                _typeface,
+                _fontSize,
+                brush,
+                pixelsPerDip);
+
+            dc.DrawText(formattedText, new Point(x, y));
+        }
+
+        // 描画エンジンにVisualを認識させるためのオーバーライド群
+        protected override int VisualChildrenCount => _children.Count;
+        protected override Visual GetVisualChild(int index) => _children[index];
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            Render(); // ウィンドウサイズ変更時に再描画
+        }
+    }
+}
+
+
+1. 拡張したカスタムコントロール (HexRenderElement.cs)
+csharpusing System;
+using System.Globalization;
+using System.Text;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+
+namespace WpfHexEditor
+{
+    public class HexRenderElement : FrameworkElement
+    {
+        private byte[] _data = Array.Empty<byte>();
+        private readonly VisualCollection _children;
+        private readonly DrawingVisual _drawingVisual;
+
+        // 描画・配置の定数
+        public double RowHeight { get; } = 18;
+        private const int BytesPerRow = 16;
+        private readonly Typeface _typeface = new Typeface("Consolas");
+        private readonly double _fontSize = 13;
+
+        // 各領域のX座標と1文字あたりの幅
+        private readonly double _addressX = 10;
+        private readonly double _hexX = 100;
+        private readonly double _asciiX = 420;
+        private double _charWidth; // フォントの1文字の幅（初期化時に計算）
+
+        // スクロール状態
+        public int CurrentRowOffset { get; set; } = 0;
+
+        // 状態管理（カーソルと選択）
+        private int _caretIndex = -1;       // 現在のカーソル位置（バイトインデックス）
+        private int _selectionStart = -1;   // 選択開始位置（範囲選択用）
+        private bool _isHexNibbleHigh = true; // 16進数編集時の上位4bit/下位4bitのフラグ
+        private bool _isDragging = false;    // マウスドラッグ中フラグ
+
+        public HexRenderElement()
+        {
+            _children = new VisualCollection(this);
+            _drawingVisual = new DrawingVisual();
+            _children.Add(_drawingVisual);
+
+            // キーボード入力を受け付けるために必須
+            Focusable = true;
+            FocusVisualStyle = null; // 標準の点線枠を非表示
+
+            // 1文字の横幅をあらかじめ計算しておく
+            var pixelsPerDip = VisualTreeHelper.GetPixelsPerDip(this);
+            var formattedText = new FormattedText("A", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, _typeface, _fontSize, Brushes.Black, pixelsPerDip);
+            _charWidth = formattedText.Width;
+        }
+
+        public void SetData(byte[] data)
+        {
+            _data = data;
+            _caretIndex = 0;
+            _selectionStart = 0;
+            Render();
+        }
+
+        public void TriggerRender() => Render();
+
+        // --- マウス操作の実装 ---
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            Focus(); // クリック時にフォーカスを得る
+
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point pt = e.GetPosition(this);
+                int clickedIndex = GetByteIndexFromOffset(pt);
+
+                if (clickedIndex >= 0 && clickedIndex < _data.Length)
+                {
+                    _caretIndex = clickedIndex;
+                    // Shiftキーを押していない場合は選択範囲をリセット
+                    if (Keyboard.Modifiers != ModifierKeys.Shift)
+                    {
+                        _selectionStart = clickedIndex;
+                    }
+                    _isHexNibbleHigh = true; // カーソル移動時は上位4bitから編集開始
+                    _isDragging = true;
+                    CaptureMouse();
+                    Render();
+                }
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (_isDragging)
+            {
+                Point pt = e.GetPosition(this);
+                int clickedIndex = GetByteIndexFromOffset(pt);
+
+                if (clickedIndex >= 0 && clickedIndex < _data.Length)
+                {
+                    _caretIndex = clickedIndex;
+                    Render(); // ドラッグに合わせて選択範囲とカーソルを更新
+                }
+            }
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (_isDragging)
+            {
+                _isDragging = false;
+                ReleaseMouseCapture();
+            }
+        }
+
+        // --- キーボード入力（編集・移動）の実装 ---
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (_data == null || _data.Length == 0 || _caretIndex < 0) return;
+
+            bool handled = true;
+
+            // 1. カーソル移動の処理
+            switch (e.Key)
+            {
+                case Key.Left:
+                    if (_caretIndex > 0) _caretIndex--;
+                    break;
+                case Key.Right:
+                    if (_caretIndex < _data.Length - 1) _caretIndex++;
+                    break;
+                case Key.Up:
+                    if (_caretIndex >= BytesPerRow) _caretIndex -= BytesPerRow;
+                    break;
+                case Key.Down:
+                    if (_caretIndex + BytesPerRow < _data.Length) _caretIndex += BytesPerRow;
+                    break;
+                default:
+                    handled = false;
+                    break;
+            }
+
+            if (handled)
+            {
+                // Shiftが押されていなければ選択範囲をカーソルに合わせる
+                if (Keyboard.Modifiers != ModifierKeys.Shift)
+                {
+                    _selectionStart = _caretIndex;
+                }
+                _isHexNibbleHigh = true;
+                Render();
+                return;
+            }
+
+            // 2. 16進数タイピングによる書き換え
+            string keyStr = e.Key.ToString();
+            // 数キー (D0-D9) または A-F キーの判定
+            char inputChar = '\0';
+            if (keyStr.Length == 2 && keyStr[0] == 'D' && char.IsDigit(keyStr[1])) inputChar = keyStr[1];
+            else if (keyStr.Length == 1 && "ABCDEF".Contains(keyStr)) inputChar = keyStr[0];
+
+            if (inputChar != '\0')
+            {
+                byte nibble = Convert.ToByte(inputChar.ToString(), 16);
+                if (_isHexNibbleHigh)
+                {
+                    // 上位4bitを書き換え (下位4bitは維持)
+                    _data[_caretIndex] = (byte)((_data[_caretIndex] & 0x0F) | (nibble << 4));
+                    _isHexNibbleHigh = false; // 次は下位4bitへ
+                }
+                else
+                {
+                    // 下位4bitを書き換え (上位4bitは維持)
+                    _data[_caretIndex] = (byte)((_data[_caretIndex] & 0xF0) | nibble);
+                    _isHexNibbleHigh = true;
+                    // 次のバイトへ進む
+                    if (_caretIndex < _data.Length - 1)
+                    {
+                        _caretIndex++;
+                        if (Keyboard.Modifiers != ModifierKeys.Shift) _selectionStart = _caretIndex;
+                    }
+                }
+                Render();
+            }
+        }
+
+        // --- 座標からバイトインデックスを逆算するヒットテスト ---
+        private int GetByteIndexFromOffset(Point pt)
+        {
+            int row = (int)(pt.Y / RowHeight) + CurrentRowOffset;
+            
+            // 16進数エリアでのヒットテスト
+            if (pt.X >= _hexX && pt.X < _asciiX)
+            {
+                // 16進数部は 1バイトあたり3文字分 ("FF ") を使用する
+                double localX = pt.X - _hexX;
+                int col = (int)(localX / (_charWidth * 3));
+                if (col >= 0 && col < BytesPerRow)
+                {
+                    return row * BytesPerRow + col;
+                }
+            }
+            // ASCIIエリアでのヒットテスト
+            else if (pt.X >= _asciiX)
+            {
+                double localX = pt.X - _asciiX;
+                int col = (int)(localX / _charWidth);
+                if (col >= 0 && col < BytesPerRow)
+                {
+                    return row * BytesPerRow + col;
+                }
+            }
+            return -1;
+        }
+
+        // --- 描画処理 ---
+        private void Render()
+        {
+            if (_data == null || _data.Length == 0) return;
+
+            using (DrawingContext dc = _drawingVisual.RenderOpen())
+            {
+                dc.DrawRectangle(Brushes.White, null, new Rect(0, 0, ActualWidth, ActualHeight));
+
+                int visibleRows = (int)Math.Ceiling(ActualHeight / RowHeight);
+                int totalRows = (int)Math.Ceiling((double)_data.Length / BytesPerRow);
+
+                // 選択範囲の最小・最大インデックスを取得
+                int selMin = Math.Min(_selectionStart, _caretIndex);
+                int selMax = Math.Max(_selectionStart, _caretIndex);
+                bool hasSelection = selMin != selMax;
+
+                for (int i = 0; i < visibleRows; i++)
+                {
+                    int rowIndex = CurrentRowOffset + i;
+                    if (rowIndex >= totalRows) break;
+
+                    double y = i * RowHeight;
+                    int fileOffset = rowIndex * BytesPerRow;
+
+                    // 1. アドレス描画
+                    DrawText(dc, fileOffset.ToString("X8"), _addressX, y, Brushes.Gray);
+
+                    StringBuilder hexBuilder = new StringBuilder();
+                    StringBuilder asciiBuilder = new StringBuilder();
+
+                    for (int j = 0; j < BytesPerRow; j++)
+                    {
+                        int byteIndex = fileOffset + j;
+                        if (byteIndex < _data.Length)
+                        {
+                            byte b = _data[byteIndex];
+
+                            // 個別のバイト背景（選択ハイライトやカーソル表示）の座標
+                            double byteHexX = _hexX + (j * _charWidth * 3);
+                            double byteAsciiX = _asciiX + (j * _charWidth);
+
+                            // 選択範囲の背景描画
+                            if (hasSelection && byteIndex >= selMin && byteIndex <= selMax)
+                            {
+                                var selRectHex = new Rect(byteHexX, y, _charWidth * 2, RowHeight);
+                                var selRectAscii = new Rect(byteAsciiX, y, _charWidth, RowHeight);
+                                dc.DrawRectangle(new SolidColorBrush(Color.FromRgb(200, 220, 245)), null, selRectHex);
+                                dc.DrawRectangle(new SolidColorBrush(Color.FromRgb(200, 220, 245)), null, selRectAscii);
+                            }
+
+                            // アクティブなカーソル表示
+                            if (byteIndex == _caretIndex && IsFocused)
+                            {
+                                // 16進数側のカーソル（上位/下位の入力位置に応じて細線を
+double cursorX = byteHexX + (_isHexNibbleHigh ? 0 : _charWidth);dc.DrawLine(new Pen(Brushes.Red, 2), new Point(cursorX, y), new Point(cursorX, y + RowHeight));// ASCII側のカーソル枠dc.DrawRectangle(null, new Pen(Brushes.Blue, 1), new Rect(byteAsciiX, y, _charWidth, RowHeight));}hexBuilder.Append(b.ToString("X2") + " ");asciiBuilder.Append(b >= 32 && b <= 126 ? (char)b : '.');}}// テキストを上書き描画（背景の上に文字が載る）DrawText(dc, hexBuilder.ToString(), _hexX, y, Brushes.Black);DrawText(dc, asciiBuilder.ToString(), _asciiX, y, Brushes.DarkSlateGray);}}}private void DrawText(DrawingContext dc, string text, double x, double y, Brush brush){var pixelsPerDip = VisualTreeHelper.GetPixelsPerDip(this);var formattedText = new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, _typeface, _fontSize, brush, pixelsPerDip);dc.DrawText(formattedText, new Point(x, y));}protected override int VisualChildrenCount => _children.Count;protected override Visual GetVisualChild(int index) => _children[index];protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) { base.OnRenderSizeChanged(sizeInfo); Render(); }}}
+
+### 2. メインウィンドウの調整 (`MainWindow.xaml.cs`)
+
+スクロール時のイベントで、再描画のトリガー(`TriggerRender()`)を呼び出すように微調整します。
+
+```csharp
+private void VerticalScroll_Scroll(object sender, ScrollEventArgs e)
+{
+    HexEditor.CurrentRowOffset = (int)e.NewValue;
+    HexEditor.TriggerRender(); // スクロール時に画面を更新
+}
+

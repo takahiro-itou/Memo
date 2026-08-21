@@ -1,0 +1,28 @@
+
+
+https://www.google.com/search?q=WPF+%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E5%85%A5%E5%8A%9B&client=firefox-b-d&hs=9K9&sca_esv=9ce9585bc280c1d5&ei=A5GHav7vBqrvseMPr4ab-Ac&biw=958&bih=895&uact=5&sclient=gws-wiz-serp&udm=50&fbs=ABfTbFXxeqtcI2Edf5dlJ3PA1WqGmqEy5uybkVvkYYHE9ARubficSOasAAlzdszC2XsjMg4Hn1JGHuKiJXW3nM-CSmO3k7QPYM4CxmlXorDYEcHZxwm3BK8DIZ9q4AoQfySfYJkstiylG5rwEqVBzaJC-LsHoa2hQEUq74BWh40gHF5vnzrQB8KY5ZpXIwuCUsuVEqOCN1J0tR8QBI7RO2jg1ajV-cYrRB57ft5Fj1UXbi35tV_cG2w&aep=10&ntc=1&sxsrf=APpeQntJrw_1505aKlXx2nEKfch3Pgt4Fw%3A1787269501268&mstk=AUtExfDr-H6PuiZuC6DQ9fpqVZek19HN_MJUfdBzy4nV26faL28ANsQ32ykLaieGxyVL82UlovB4vGvJSg2sEAgV3SNNvWW0JG04r1u41_M72MPAJ_lZdhR83rH5vOqyxJAruiQhzAxLvgrsCsJuwSZI22usJUftBF_IE2w&aioh=3&csuir=1&atvm=2&mtid=ipGHarSLIZmNvr0PsKvCoQY
+
+
+WPFで遊ぶ「キーボード入力でシューティングの自機を動かす」 
+https://note.com/loyal_koala8607/n/n6d1d08c43892
+
+WPF ジョイパッド
+
+
+Read joypad from WPF Application
+https://gist.github.com/sunnyone/3683793
+
+WPF上でManaged DirectXを動かす
+https://rimever.hatenablog.com/entry/2021/03/09/000000
+
+C#で使えるゲーム開発環境
+https://vdlz.xyz/Csharp/Porpose/Game/GameDevelopmentEnvironment.html
+
+-   WindowsのC#でキーをリアルタイムに取得する方法
+-   https://qiita.com/sawasaka/items/b3d5285b4198c0e46628
+
+
+ゲームパッドと振動
+https://learn.microsoft.com/ja-jp/windows/uwp/gaming/gamepad-and-vibration
+
+
