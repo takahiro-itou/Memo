@@ -1,0 +1,12 @@
+
+プロパティの戻り値が MyClass? の時、
+MyClass? tmp = this.MyProperty;
+if ( tmp is null ) { return; }
+とした後、
+tmp が null ではないとわかっているので、 null 非許容型 MyClass にキャストして扱うには？
+
+if (this.MyProperty is not MyClass myClass) { return; }
+
+明示的なキャスト
+MyClass myClass = (MyClass)tmp;
+
