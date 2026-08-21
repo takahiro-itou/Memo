@@ -8,3 +8,19 @@ https://prota-p.com/category/wpf/
 https://github.com/prota-p/IntroductionToWPF
 
 
+##  非同期
+
+https://qiita.com/rawr/items/5d49960a4e4d3823722f
+https://zenn.dev/shinta0806/articles/progressbar-iprogress
+https://gaishiengineer.hatenablog.com/entry/2022/10/22/161838
+
+##
+
+https://zenn.dev/apterygiformes/articles/5c6ccbae6c3939
+
+
+##  キャンセル
+
+https://zenn.dev/nossa/articles/df258b3ddc351f
+
+
