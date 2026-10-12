@@ -1,0 +1,9 @@
+
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel0" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel1" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel2" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel3" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel4" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\msahci\Controller0\Channel5" /v TreatAsInternalPort /t REG_DWORD /d 1 /f
+
+
