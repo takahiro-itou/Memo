@@ -1,0 +1,65 @@
+
+##  リポジトリ
+
+https://github.com/TASEmulators/fceux
+https://github.com/christopherpow/nes-test-roms/
+https://github.com/kaishuu0123/chibines/blob/main/README.md
+- https://zenn.dev/kaishuu0123/articles/4d0f27558a33ce
+
+##  6502 アセンブラ
+
+http://vdmgr.g2.xrea.com/module_6502.html
+http://pgate1.at-ninja.jp/NES_on_FPGA/nes_cpu.htm
+
+開発環境
+https://cc65.github.io/
+- https://qiita.com/tmori/items/14e250c52d362a403cbe
+
+##  エミュレータ開発
+
+https://qiita.com/code2545Light/items/94e9577dd6371528b6d3
+- https://github.com/bokuweb/rustynes
+
+http://vdmgr.g2.xrea.com/module_6502.html
+https://qiita.com/bokuweb/items/1575337bef44ae82f4d3
+- パレットのミラー
+- https://qiita.com/bokuweb/items/1575337bef44ae82f4d3#%E3%83%91%E3%83%AC%E3%83%83%E3%83%88
+- https://github.com/bokuweb/flownes/blob/master/src/cpu/opcode.js
+
+https://zenn.dev/razokulover/articles/1191ca55f9f22e
+https://note.com/hahaha_joke_desu/n/ne9cbf9ff99d2
+https://note.com/takataok/n/n5337f1639a88
+https://www.nesdev.org/wiki/Nesdev_Wiki
+https://www.nesdev.org/wiki/6502_instructions
+
+
+##  その他
+
+ファミコンと6502CPUに触れる
+https://note.com/yaito_geek/n/n9c9ec1c8c47f
+
+
+ファミコンカセットを０からつくる。２歩目「企画編」
+https://note.com/kamibukuro18/n/n6f0b44be22aa
+
+ファミコンROM作ってみた
+https://qiita.com/tmori/items/a130fb0364dc5f757d67
+https://qiita.com/tmori/items/14e250c52d362a403cbe
+
+https://tekepen.com/nes/
+
+
+https://nlab.itmedia.co.jp/cont/articles/3274704/
+https://wikiwiki.jp/dqdic3rd/%E3%80%90%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%8620%E6%96%87%E5%AD%97%E3%81%AE%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E3%80%91
+https://otakuma.net/archives/2023050803.html
+https://futaman.futabanet.jp/articles/-/127560?page=3
+
+
+##  PPU
+
+https://note.com/karu_gamo/n/n39ff34d14298
+https://www.nesdev.org/wiki/PPU_scrolling#Coarse_X_increment
+https://taotao54321.hatenablog.com/entry/2017/04/11/115205
+https://tekepen.com/nes/ppu.html
+
+
