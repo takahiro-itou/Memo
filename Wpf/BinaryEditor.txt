@@ -495,7 +495,31 @@ namespace WpfHexEditor
                             if (byteIndex == _caretIndex && IsFocused)
                             {
                                 // 16進数側のカーソル（上位/下位の入力位置に応じて細線を
-double cursorX = byteHexX + (_isHexNibbleHigh ? 0 : _charWidth);dc.DrawLine(new Pen(Brushes.Red, 2), new Point(cursorX, y), new Point(cursorX, y + RowHeight));// ASCII側のカーソル枠dc.DrawRectangle(null, new Pen(Brushes.Blue, 1), new Rect(byteAsciiX, y, _charWidth, RowHeight));}hexBuilder.Append(b.ToString("X2") + " ");asciiBuilder.Append(b >= 32 && b <= 126 ? (char)b : '.');}}// テキストを上書き描画（背景の上に文字が載る）DrawText(dc, hexBuilder.ToString(), _hexX, y, Brushes.Black);DrawText(dc, asciiBuilder.ToString(), _asciiX, y, Brushes.DarkSlateGray);}}}private void DrawText(DrawingContext dc, string text, double x, double y, Brush brush){var pixelsPerDip = VisualTreeHelper.GetPixelsPerDip(this);var formattedText = new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, _typeface, _fontSize, brush, pixelsPerDip);dc.DrawText(formattedText, new Point(x, y));}protected override int VisualChildrenCount => _children.Count;protected override Visual GetVisualChild(int index) => _children[index];protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) { base.OnRenderSizeChanged(sizeInfo); Render(); }}}
+                                double cursorX = byteHexX + (_isHexNibbleHigh ? 0 : _charWidth);
+                                dc.DrawLine(new Pen(Brushes.Red, 2), new Point(cursorX, y), new Point(cursorX, y + RowHeight));// ASCII側のカーソル枠
+                                dc.DrawRectangle(null, new Pen(Brushes.Blue, 1), new Rect(byteAsciiX, y, _charWidth, RowHeight));
+                            }
+                            hexBuilder.Append(b.ToString("X2") + " ");
+                            asciiBuilder.Append(b >= 32 && b <= 126 ? (char)b : '.');
+                        }
+                    }
+                    // テキストを上書き描画（背景の上に文字が載る）
+                    DrawText(dc, hexBuilder.ToString(), _hexX, y, Brushes.Black);
+                    DrawText(dc, asciiBuilder.ToString(), _asciiX, y, Brushes.DarkSlateGray);
+                }
+            }
+        }
+
+        private void DrawText(DrawingContext dc, string text, double x, double y, Brush brush){
+            var pixelsPerDip = VisualTreeHelper.GetPixelsPerDip(this);
+            var formattedText = new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, _typeface, _fontSize, brush, pixelsPerDip);
+            dc.DrawText(formattedText, new Point(x, y));
+        }
+        protected override int VisualChildrenCount => _children.Count;
+        protected override Visual GetVisualChild(int index) => _children[index];
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) { base.OnRenderSizeChanged(sizeInfo); Render(); }
+    }
+}
 
 ### 2. メインウィンドウの調整 (`MainWindow.xaml.cs`)
 
